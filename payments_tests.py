@@ -16,7 +16,7 @@ class TestCurrencyRates(unittest.TestCase):
         response = requests.get(self.base_url+"rate", headers=self.headers)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["partner rate"],'0.05')
+        self.assertEqual(data["partner_rate"],'0.05')
 
     def test_rate_with_wrong_token(self):
         headers = {"Token": "cc3"}

@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
 import logging
-import exceptions
+from exceptions import NotAuthorised
 import confg
-# import requests
-from work_with_db import Partner, Payment, Rate, get_rates
+from work_with_db import Partner, Payment, Rate, get_rates, verification
 from peewee import *
 
 
@@ -22,25 +21,15 @@ def see_history():
         headers = request.headers
         token = headers.get("Token")
 
-        partner = Partner.select().where(Partner.token == token)
-        if not partner:
-            logging.info(f"didnt authorised  with token {token}")
-            return jsonify({"message": "ERROR: Unauthorized"}), 401
-        payments = Payment.select().where(Payment.owner == partner[0].id)
-
-        logging.info(f"authorised sucesfuly with token {token}")
+        partner = verification(token)
+        payments = Payment.select().where(Payment.owner == partner.id)
 
         currency = request.args.get("currency")
         logging.info(f"Searching history with filtr {currency}")
 
         if not currency:
-            answer = []
-            for payment in payments:
-                payment = payment.to_json()
-                answer.append(payment)
 
-            if not answer:
-                return jsonify("You have no records ! "), 200
+            answer = [payment.to_json() for payment in payments]
             return jsonify(answer), 200
 
         if currency not in confg.currencys:
@@ -50,14 +39,12 @@ def see_history():
 
         payments = [x for x in payments if x.original_currency == currency]
 
-        answer = []
-        for payment in payments:
-            payment = payment.to_json()
-            answer.append(payment)
+        answer = [payment.to_json() for payment in payments]
 
-        if not answer:
-            return jsonify("You have no records ! "), 200
         return jsonify(answer), 200
+
+    except NotAuthorised as e:
+        return e.message
 
     except Exception as e:
         logging.error(f"Error occured : {e}")
@@ -66,7 +53,9 @@ def see_history():
 
 @app.route("/add-payment", methods=["POST"])
 def add_payment():
-    pass
+    headers = request.headers
+    token = headers.get("Token")
+    partner = verification(token)
 
 
 @app.route("/rate")
@@ -75,18 +64,14 @@ def rate():
         headers = request.headers
         token = headers.get("Token")
 
-        partner = Partner.select().where(Partner.token == token)
-        if not partner:
-            logging.info(f"didnt authorised  with token {token}")
-            return jsonify({"message": "ERROR: Unauthorized"}), 401
-        logging.info(f"authorised sucesfuly with token {token}")
-
         currency = request.args.get("currency")
         amount = request.args.get("amount")
         logging.info(f"Got {currency} and {amount}, procesing")
 
+        partner = verification(token)
+
         if not amount or not currency:
-            return jsonify({"partner rate": partner[0].partner_rate}), 200
+            return jsonify({"partner_rate": partner.partner_rate}), 200
 
         if currency not in confg.currencys:
             return jsonify({"message": "Wrong currency, please check if correct"}), 500
@@ -94,7 +79,10 @@ def rate():
         amount = float(amount)
         rates = get_rates()
 
-        return jsonify(round(amount*float(rates[currency])+amount*float(rates[currency])*float(partner[0].partner_rate), 2)), 200
+        return jsonify(round(amount*float(rates[currency])+amount*float(rates[currency])*float(partner.partner_rate), 2)), 200
+
+    except NotAuthorised as e:
+        return e.message
 
     except Exception as e:
         logging.error(f"Error occured : {e}")
