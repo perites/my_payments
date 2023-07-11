@@ -3,6 +3,7 @@ from datetime import date, datetime
 import logging
 import confg
 import work_with_api
+import json
 
 
 db = SqliteDatabase('payments_partners.db')
@@ -26,6 +27,15 @@ class Payment(Model):
 
     class Meta:
         database = db
+
+    def to_json(self):
+    	answer_dict = {"owner id " : self.owner.name, 
+    					"amount" : self.amount, 
+    					"timestamp" : self.timestamp,
+    					"original_amount" : self.original_amount,
+    					"original_currency" : self.original_currency}
+
+    	return answer_dict
 
 
 class Rate(Model):
