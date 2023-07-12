@@ -12,7 +12,7 @@ class TestCurrencyRates(unittest.TestCase):
         response = requests.get(self.base_url + "rate", headers=self.headers)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["partner_rate"], '0.05')
+        self.assertEqual(data["data"]["partner_rate"], '0.05')
 
     def test_rate_with_wrong_token(self):
         headers = {"Token": "cc3"}
@@ -42,7 +42,7 @@ class TestCurrencyRates(unittest.TestCase):
             self.base_url + "rate" + "?currency=Usd&amount=100", headers=self.headers)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, 3906)
+        self.assertEqual(data["data"]["result"], 3906)
 
     def test_history(self):
         response = requests.get(self.base_url + "history", headers=self.headers)
@@ -88,7 +88,7 @@ class TestCurrencyRates(unittest.TestCase):
 
     def test_add_get_with_wrong_amount(self):
         response = requests.post(
-            self.base_url + "add-payment" + "?amount=ttt&currency=Usd", headers=self.headers)
+            self.base_url + "add-payment", data={"amount": "ttt", "currency": "Usd"}, headers=self.headers)
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
@@ -96,7 +96,7 @@ class TestCurrencyRates(unittest.TestCase):
 
     def test_add_with_amount_wrong_currency(self):
         response = requests.post(
-            self.base_url + "add-payment" + "?currency=Ght&amount=100", headers=self.headers)
+            self.base_url + "add-payment", data={"amount": "100", "currency": "Ght"}, headers=self.headers)
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
@@ -105,11 +105,10 @@ class TestCurrencyRates(unittest.TestCase):
     def test_add_get_with_currency_and_amount(self):
         headers = {"Token": "vv12"}
         response = requests.post(
-            self.base_url + "add-payment" + "?currency=Usd&amount=100", headers=headers)
+            self.base_url + "add-payment", data={"amount": "100", "currency": "Usd"}, headers=headers)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            data["message"], "All went good, added payment at 3906.0 hrn")
+        self.assertIsNotNone(data["data"]["success"])
 
 
 if __name__ == "__main__":

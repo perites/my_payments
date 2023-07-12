@@ -1,6 +1,8 @@
-from peewee import *
 from datetime import date, datetime
 import logging
+
+from peewee import *
+
 import confg
 import work_with_api
 from exceptions import NotAuthorised

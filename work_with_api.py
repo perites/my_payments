@@ -1,7 +1,8 @@
-import requests
 import logging
-from exceptions import BadAPIResponse
+import requests
 import json
+
+from exceptions import BadAPIResponse
 
 
 class PrivatAPI():
