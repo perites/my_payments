@@ -2,11 +2,8 @@ from flask import Flask, request, jsonify
 import logging
 from exceptions import NotAuthorised
 import confg
-from work_with_db import Partner, Payment, Rate, get_rates, verification
-from peewee import *
+from work_with_db import Payment, get_rates, verification
 
-
-import json
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = 'c42e8d7a0a1003456342385cb9e29b6b'
@@ -53,39 +50,38 @@ def see_history():
         return jsonify({"Error": e}), 500
 
 
-@app.route("/add-payment")
+@app.route("/add-payment", methods=["GET", "POST"])
 def add_payment():
-	try: 
-		headers = request.headers
-		token = headers.get("Token")
-		partner = verification(token)
+    try:
+        headers = request.headers
+        token = headers.get("Token")
+        partner = verification(token)
 
-		currency = request.args.get("currency")
-		amount = request.args.get("amount")
-		logging.info(f"Got {currency} and {amount}, procesing")
+        currency = request.args.get("currency")
+        amount = request.args.get("amount")
+        logging.info(f"Got {currency} and {amount}, procesing")
 
-		if not amount or not currency:
-		    return jsonify({"message": "Please specify amount and currency"}), 500
+        if not amount or not currency:
+            return jsonify({"message": "Please specify amount and currency"}), 500
 
-		if currency not in confg.currencys:
-		    return jsonify({"message": "Wrong currency, please check if correct"}), 500
+        if currency not in confg.currencys:
+            return jsonify({"message": "Wrong currency, please check if correct"}), 500
 
-		amount = float(amount)
-		rates = get_rates()
-		cal_amount = round(amount*float(rates[currency])+amount*float(rates[currency])*float(partner.partner_rate), 2)
+        amount = float(amount)
+        rates = get_rates()
+        cal_amount = round(amount * float(rates[currency]) + amount * float(
+            rates[currency]) * float(partner.partner_rate), 2)
 
-		Payment.create(owner=partner, amount=cal_amount, original_currency=currency, original_amount=amount)
-		return jsonify({"message": f"All went good, added payment at {cal_amount} hrn"}), 200
+        Payment.create(owner=partner, amount=cal_amount,
+                       original_currency=currency, original_amount=amount)
+        return jsonify({"message": f"All went good, added payment at {cal_amount} hrn"}), 200
 
+    except NotAuthorised as e:
+        return e.message
 
-	except NotAuthorised as e:
-		return e.message
-
-	except Exception as e:
-		logging.error(f"Error occured : {e}")
-		return jsonify({"Error": str(e)}), 500    
-
-
+    except Exception as e:
+        logging.error(f"Error occured : {e}")
+        return jsonify({"Error": str(e)}), 500
 
 
 @app.route("/rate")
@@ -109,7 +105,7 @@ def rate():
         amount = float(amount)
         rates = get_rates()
 
-        return jsonify(round(amount*float(rates[currency])+amount*float(rates[currency])*float(partner.partner_rate), 2)), 200
+        return jsonify(round(amount * float(rates[currency]) + amount * float(rates[currency]) * float(partner.partner_rate), 2)), 200
 
     except NotAuthorised as e:
         return e.message

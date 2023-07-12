@@ -53,7 +53,7 @@ def get_rates():
     if not query:
         logging.info(f"No records for {date.today()}, adding")
         for cur in confg.currencys:
-            rate = getattr(work_with_api, cur+"API")().get_rate()
+            rate = getattr(work_with_api, cur + "API")().get_rate()
             Rate.create(date=date.today(), currency_in=cur,
                         currency_to="Hrn", rate=rate)
         query = Rate.select().where(Rate.date == date.today())

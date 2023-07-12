@@ -58,4 +58,4 @@ class BtcAPI(CryptoAPI):
 
 class HrnAPI():
     def get_rate(self):
-        return 1 
+        return 1

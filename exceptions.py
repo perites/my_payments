@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import render_template
 
 
 class BadAPIResponse(Exception):
@@ -7,8 +7,6 @@ class BadAPIResponse(Exception):
 
 
 class NotAuthorised(Exception):
-	def __init__(self):
-		self.message =  {"message": "ERROR: Unauthorized"}, 401
-		super().__init__(self.message)
-
-
+    def __init__(self):
+        self.message = {"message": "ERROR: Unauthorized"}, 401
+        super().__init__(self.message)
