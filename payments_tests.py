@@ -27,7 +27,7 @@ class TestCurrencyRates(unittest.TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            data["Error"], "could not convert string to float: 'ttt'")
+            data["message"], "could not convert string to float: 'ttt'")
 
     def test_rate_with_amount_wrong_currency(self):
         response = requests.get(
@@ -92,7 +92,7 @@ class TestCurrencyRates(unittest.TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            data["Error"], "could not convert string to float: 'ttt'")
+            data["message"], "could not convert string to float: 'ttt'")
 
     def test_add_with_amount_wrong_currency(self):
         response = requests.post(

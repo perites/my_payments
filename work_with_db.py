@@ -31,13 +31,11 @@ class Payment(Model):
         database = db
 
     def to_json(self):
-        answer_dict = {"owner_id ": self.owner.name,
-                       "amount": self.amount,
-                       "timestamp": self.timestamp,
-                       "original_amount": self.original_amount,
-                       "original_currency": self.original_currency}
-
-        return answer_dict
+        return {"owner_id ": self.owner.name,
+                "amount": self.amount,
+                "timestamp": self.timestamp,
+                "original_amount": self.original_amount,
+                "original_currency": self.original_currency}
 
 
 class Rate(Model):
@@ -62,8 +60,7 @@ def get_rates():
     else:
         logging.info(f"There is record for {date.today()} : {query[0].date} continuing")
 
-    answer = {r.currency_in: r.rate for r in query}
-    return answer
+    return {r.currency_in: r.rate for r in query}
 
 
 def verification(token):

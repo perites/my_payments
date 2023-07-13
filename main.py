@@ -37,9 +37,7 @@ def see_history():
 
     payments = payments.where(Payment.original_currency == currency)
 
-    answer = [payment.to_json() for payment in payments]
-
-    return answer, 200
+    return [payment.to_json() for payment in payments], 200
 
 
 @app.route("/rate")
