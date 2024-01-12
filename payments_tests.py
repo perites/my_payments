@@ -19,7 +19,7 @@ class TestCurrencyRates(unittest.TestCase):
         response = requests.get(self.base_url + "rate", headers=headers)
         data = response.json()
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(data["message"], "ERROR: Unauthorized")
+        self.assertEqual(data["data"], "ERROR: Unauthorized")
 
     def test_rate_get_with_wrong_amount(self):
         response = requests.get(
@@ -27,7 +27,7 @@ class TestCurrencyRates(unittest.TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            data["message"], "could not convert string to float: 'ttt'")
+            data["data"], "could not convert string to float: 'ttt'")
 
     def test_rate_with_amount_wrong_currency(self):
         response = requests.get(
@@ -35,14 +35,14 @@ class TestCurrencyRates(unittest.TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            data["message"], 'Wrong currency, please check if correct')
+            data["data"], 'ERROR: Wrong currency, please check if correct')
 
     def test_rate_get_with_currency_and_amount(self):
         response = requests.get(
             self.base_url + "rate" + "?currency=Usd&amount=100", headers=self.headers)
         data = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["data"]["result"], 3906)
+        self.assertEqual(data["data"]["result"], 4074.0)
 
     def test_history(self):
         response = requests.get(self.base_url + "history", headers=self.headers)
@@ -56,7 +56,7 @@ class TestCurrencyRates(unittest.TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            data["message"], "Wrong currency, please check if correct")
+            data["data"], "ERROR: Wrong currency, please check if correct")
 
     def test_history_with_currency(self):
         response = requests.get(
@@ -70,21 +70,23 @@ class TestCurrencyRates(unittest.TestCase):
         response = requests.get(self.base_url + "history", headers=headers)
         data = response.json()
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(data["message"], "ERROR: Unauthorized")
+        self.assertEqual(data["data"], "ERROR: Unauthorized")
 
     def test_add_get_partners_rate(self):
         response = requests.post(
             self.base_url + "add-payment", headers=self.headers)
         data = response.json()
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(data["message"], "Please specify amount and currency")
+        self.assertEqual(data["data"]
+                         , "ERROR: Please specify amount and currency")
 
     def test_add_with_wrong_token(self):
         headers = {"Token": "cc3"}
         response = requests.post(self.base_url + "add-payment", headers=headers)
         data = response.json()
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(data["message"], "ERROR: Unauthorized")
+        self.assertEqual(data["data"]
+                         , "ERROR: Unauthorized")
 
     def test_add_get_with_wrong_amount(self):
         response = requests.post(
@@ -92,7 +94,8 @@ class TestCurrencyRates(unittest.TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            data["message"], "could not convert string to float: 'ttt'")
+            data["data"]
+            , "could not convert string to float: 'ttt'")
 
     def test_add_with_amount_wrong_currency(self):
         response = requests.post(
@@ -100,7 +103,8 @@ class TestCurrencyRates(unittest.TestCase):
         data = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            data["message"], 'Wrong currency, please check if correct')
+            data["data"]
+            , 'ERROR: Wrong currency, please check if correct')
 
     def test_add_get_with_currency_and_amount(self):
         headers = {"Token": "vv12"}

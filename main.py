@@ -10,7 +10,6 @@ from decorators import error_catcher
 app = Flask(__name__)
 app.config["SECRET_KEY"] = 'c42e8d7a0a1003456342385cb9e29b6b'
 
-
 logging.basicConfig(format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
                     filename='payments.log', filemode='w', level=logging.INFO)
 
@@ -20,7 +19,6 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s - %(message)s', datefmt='
 def see_history():
     headers = request.headers
     token = headers.get("Token")
-
     partner = verification(token)
     payments = Payment.select().where(Payment.owner == partner.id)
 
@@ -28,7 +26,6 @@ def see_history():
     logging.info(f"Searching history with filtr {currency}")
 
     if not currency:
-
         answer = [payment.to_json() for payment in payments]
         return answer, 200
 
@@ -61,7 +58,9 @@ def rate():
     amount = float(amount)
     rates = get_rates()
 
-    return {"result": round(amount * float(rates[currency]) + amount * float(rates[currency]) * float(partner.partner_rate), 2)}, 200
+    return {
+        "result": round(amount * float(rates[currency]) + amount * float(rates[currency]) * float(partner.partner_rate),
+                        2)}, 200
 
 
 @app.route("/add-payment", methods=["POST"])
