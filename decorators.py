@@ -3,8 +3,6 @@ import logging
 from flask import jsonify
 from functools import wraps
 
-from exceptions import NotAuthorised, WrongCurrency, MissingArguments
-
 
 def error_catcher(func):
     @wraps(func)
@@ -15,21 +13,5 @@ def error_catcher(func):
         except Exception as e:
             logging.error(f"Error occured : {e}")
             return jsonify({"data": e.__str__()}), e.code if hasattr(e, "code") else 500
-
-        # except NotAuthorised as e:
-        #     logging.error(f"Error occured : {e}")
-        #     return jsonify(e.message), e.code
-        #
-        # except WrongCurrency as e:
-        #     logging.error(f"Error occured : {e}")
-        #     return jsonify(e.message), e.code
-        #
-        # except MissingArguments as e:
-        #     logging.error(f"Error occured : {e}")
-        #     return jsonify(e.message), e.code
-        #
-        # except Exception as e:
-        #     logging.error(f"Error occured : {e}")
-        #     return {"message": str(e)}, 500
 
     return wrapper

@@ -17,22 +17,16 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s - %(message)s', datefmt='
 @app.route("/history")
 @error_catcher
 def see_history():
-    headers = request.headers
-    token = headers.get("Token")
-    partner = verification(token)
+    partner = verification(request.headers.get("Token"))
+
     payments = Payment.select().where(Payment.owner == partner.id)
 
     currency = request.args.get("currency")
-    logging.info(f"Searching history with filtr {currency}")
-
-    if not currency:
-        answer = [payment.to_json() for payment in payments]
-        return answer, 200
-
-    if currency not in confg.currencys:
-        raise WrongCurrency
-
-    payments = payments.where(Payment.original_currency == currency)
+    if currency:
+        if currency not in confg.currencys:
+            raise WrongCurrency
+        logging.info(f"Searching history with filtr {currency}")
+        payments = payments.where(Payment.original_currency == currency)
 
     return [payment.to_json() for payment in payments], 200
 
@@ -40,14 +34,11 @@ def see_history():
 @app.route("/rate")
 @error_catcher
 def rate():
-    headers = request.headers
-    token = headers.get("Token")
+    partner = verification(request.headers.get("Token"))
 
     currency = request.args.get("currency")
     amount = request.args.get("amount")
     logging.info(f"Got {currency} and {amount}, procesing")
-
-    partner = verification(token)
 
     if not amount or not currency:
         return {"partner_rate": partner.partner_rate}, 200
@@ -66,9 +57,7 @@ def rate():
 @app.route("/add-payment", methods=["POST"])
 @error_catcher
 def add_payment():
-    headers = request.headers
-    token = headers.get("Token")
-    partner = verification(token)
+    partner = verification(request.headers.get("Token"))
 
     currency = request.form.get("currency")
     amount = request.form.get("amount")
